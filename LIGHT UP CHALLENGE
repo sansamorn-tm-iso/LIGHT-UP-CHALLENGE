@@ -112,23 +112,6 @@ body {
   box-shadow: 0 3px 10px rgba(255, 0, 127, 0.3);
 }
 
-.download-html-btn {
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: #FFFFFF;
-  border: none;
-  border-radius: 999px;
-  padding: 6px 12px;
-  font-size: 0.82rem;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3);
-  transition: transform 0.15s ease;
-}
-
-.download-html-btn:active {
-  transform: scale(0.95);
-}
-
 .sound-btn {
   background: linear-gradient(135deg, #E0E7FF, #F3E8FF);
   border: 2px solid #C084FC;
@@ -217,30 +200,6 @@ body {
   font-size: 1.05rem;
   font-weight: 600;
   color: #475569;
-}
-
-/* กล่องกติกาการเล่นบนหน้าแรก */
-.rules-box {
-  background: linear-gradient(135deg, #FFFBEB, #FDF4FF);
-  border: 2px solid #E9D5FF;
-  border-radius: 18px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  font-size: 0.88rem;
-  color: #334155;
-}
-
-.rules-box h3 {
-  font-size: 0.98rem;
-  color: #7E22CE;
-  margin-bottom: 6px;
-  font-weight: 800;
-}
-
-.rules-box ol {
-  padding-left: 20px;
-  line-height: 1.5;
-  font-weight: 600;
 }
 
 /* หน้าจอแต่ละสถานะ */
@@ -402,7 +361,7 @@ body {
   background: #E2E8F0;
   border-radius: 999px;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   padding: 2px;
 }
 
@@ -414,6 +373,30 @@ body {
   transition: width 0.1s linear;
 }
 
+.speed-phase-banner {
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #FFFFFF;
+  background: linear-gradient(90deg, #10B981, #059669);
+  border-radius: 999px;
+  padding: 6px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.25);
+  transition: background 0.3s ease;
+}
+
+.speed-phase-banner.phase-2 {
+  background: linear-gradient(90deg, #F59E0B, #EA580C);
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3);
+}
+
+.speed-phase-banner.phase-3 {
+  background: linear-gradient(90deg, #EF4444, #DB2777);
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.35);
+  animation: pulse 0.55s infinite alternate;
+}
+
 .active-player-banner {
   text-align: center;
   font-weight: 800;
@@ -423,7 +406,7 @@ body {
   border: 2px solid #E9D5FF;
   border-radius: 999px;
   padding: 6px 14px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 /* ==========================================
@@ -435,7 +418,7 @@ body {
   gap: 20px;
   align-items: center;
   justify-content: center;
-  margin: 14px 0 20px 0;
+  margin: 10px 0 18px 0;
   padding: 22px 14px;
   background: linear-gradient(145deg, #0F172A, #1E1B4B);
   border-radius: 28px;
@@ -515,12 +498,18 @@ body {
     0 0 55px 18px rgba(245, 158, 11, 0.5),
     inset 0 4px 12px rgba(255, 255, 255, 0.95);
   color: #78350F;
-  animation: lightPulse 0.45s ease-in-out infinite alternate;
+  animation: lightPulse 0.35s ease-in-out infinite alternate;
 }
 
 .light-btn.lit .light-btn-icon {
   filter: none;
   transform: scale(1.15);
+}
+
+/* เอฟเฟกต์กดปุ่มที่ไม่มีไฟ (ไม่ได้คะแนน) */
+.light-btn.wrong-tap {
+  border-color: #EF4444;
+  box-shadow: 0 4px 0 #7F1D1D, 0 0 14px rgba(239, 68, 68, 0.5);
 }
 
 @keyframes lightPulse {
@@ -874,7 +863,6 @@ body {
     <div class="top-bar">
       <span class="badge">💡 แข่งขัน 60 วินาที</span>
       <div class="top-bar-actions">
-        <button id="downloadHtmlBtn" class="download-html-btn" type="button" title="ดาวน์โหลดไฟล์ HTML ลงเครื่อง">💾 ดาวน์โหลดไฟล์ HTML</button>
         <button id="soundToggleBtn" class="sound-btn" title="เปิด/ปิดเสียงเพลงและเอฟเฟกต์">🔊</button>
       </div>
     </div>
@@ -895,20 +883,9 @@ body {
   </div>
 </div>
 
-<!-- หน้าจอที่ 1: ผู้เข้าแข่งขันลงทะเบียนชื่อและรอแอดมินกดเริ่มเกม -->
+<!-- หน้าจอที่ 1: ผู้เข้าแข่งขันลงทะเบียนชื่อและรอแอดมินกดเริ่มเกม (ตัดกล่องกติกาออกตามที่ขอ) -->
 <div id="startScreen" class="screen active">
   <div id="registerFormBox">
-    <div class="rules-box">
-      <h3>📜 กติกาการเล่น LIGHT UP CHALLENGE</h3>
-      <ol>
-        <li>มีปุ่มทั้งหมด 5 ปุ่ม เรียงเป็นแถวบน 3 ปุ่ม ล่าง 2 ปุ่ม</li>
-        <li>เมื่อเริ่มเกม ระบบจะสุ่มเปิดไฟปุ่มใดปุ่มหนึ่ง</li>
-        <li>ผู้เล่นต้องรีบกดปุ่มที่กำลังมีแสงเท่านั้น (+1 คะแนน)</li>
-        <li>เมื่อกดถูกแล้ว ไฟจะย้ายไปยังปุ่มอื่นแบบสุ่มทันที</li>
-        <li>จับเวลา 60 วินาที ใครได้คะแนนรวมสูงสุดเป็นผู้ชนะ!</li>
-      </ol>
-    </div>
-
     <div class="input-group">
       <label for="playerNameInput" class="input-label">✨ ใส่ชื่อของคุณเพื่อเข้าแข่งขัน ✨</label>
       <input type="text" id="playerNameInput" class="name-input" placeholder="พิมพ์ชื่อของคุณที่นี่..." maxlength="20">
@@ -944,8 +921,12 @@ body {
     <div id="progressBar" class="progress-bar-fill"></div>
   </div>
 
+  <div id="speedPhaseBanner" class="speed-phase-banner">
+    ⚡ ช่วงที่ 1 (0–20 วินาที): ไฟติดนาน 0.8 วินาที
+  </div>
+
   <div class="active-player-banner">
-    👤 ผู้เข้าแข่งขัน: <span id="playerActiveLabel">ผู้เล่น</span> — รีบกดปุ่มที่มีแสงไฟ!
+    👤 ผู้เข้าแข่งขัน: <span id="playerActiveLabel">ผู้เล่น</span> — กดเฉพาะปุ่มที่มีไฟ!
   </div>
 
   <!-- แผงปุ่มไฟ 5 ปุ่ม: แถวบน 3 ปุ่ม, แถวล่าง 2 ปุ่ม -->
@@ -1077,7 +1058,7 @@ body {
         if (!soundEnabled || (!isPlaying && !isAdminRunningTimer)) return;
         initAudio();
         const freq = melody[bgmStep % melody.length];
-        const pitchMultiplier = timeLeft <= 10 ? 1.122 : 1.0;
+        const pitchMultiplier = timeLeft <= 20 ? 1.15 : (timeLeft <= 40 ? 1.07 : 1.0);
 
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -1290,12 +1271,15 @@ body {
     let isPlayerReady = false;
     let score = 0;
     let timeLeft = GAME_DURATION;
+    let gameStartTimeMs = 0;
     let timerInterval = null;
+    let lightAutoMoveTimeout = null;
     let adminTimerInterval = null;
     let isPlaying = false;
     let isAdminRunningTimer = false;
     let isScoreRevealed = false;
     let activeLightIndex = -1; // เก็บตำแหน่งปุ่มที่กำลังส่องแสง (0 ถึง 4)
+    let isCurrentLightHit = false; // ป้องกันการกดซ้ำปุ่มเดิมก่อนไฟย้าย
     let remotePlayersMap = {};
 
     const mqttClients = [];
@@ -1315,7 +1299,6 @@ body {
     const syncStatusBadge = document.getElementById('syncStatusBadge');
     const qrCodeImg = document.getElementById('qrCodeImg');
     const copyLinkBtn = document.getElementById('copyLinkBtn');
-    const downloadHtmlBtn = document.getElementById('downloadHtmlBtn');
 
     const registerFormBox = document.getElementById('registerFormBox');
     const waitingAdminBox = document.getElementById('waitingAdminBox');
@@ -1327,6 +1310,7 @@ body {
     const timeDisplay = document.getElementById('timeDisplay');
     const scoreDisplay = document.getElementById('scoreDisplay');
     const progressBar = document.getElementById('progressBar');
+    const speedPhaseBanner = document.getElementById('speedPhaseBanner');
     const buttonContainer = document.getElementById('buttonContainer');
     const lightButtons = Array.from(document.querySelectorAll('.light-btn'));
     const playerActiveLabel = document.getElementById('playerActiveLabel');
@@ -1634,22 +1618,79 @@ body {
     }
 
     // ==========================================
-    // ระบบสุ่มเปิดไฟปุ่ม 1 ใน 5 ปุ่ม (LIGHT UP CHALLENGE)
+    // ระบบสุ่มเปิดไฟปุ่ม 1 ใน 5 ปุ่ม + เพิ่มความยากตามช่วงเวลา (0.8s / 0.5s / 0.3s)
     // ==========================================
+    function getElapsedSeconds() {
+      if (!isPlaying || !gameStartTimeMs) return 0;
+      return (performance.now() - gameStartTimeMs) / 1000;
+    }
+
+    // คำนวณเวลาที่ไฟติดในแต่ละช่วงเวลา:
+    // ช่วง 0–20 วินาที: 0.8 วินาที (800 ms)
+    // ช่วง 21–40 วินาที: 0.5 วินาที (500 ms)
+    // ช่วง 41–60 วินาที: 0.3 วินาที (300 ms)
+    function getCurrentLightDurationMs() {
+      const elapsed = getElapsedSeconds();
+      if (elapsed < 20) {
+        return 800;
+      } else if (elapsed < 40) {
+        return 500;
+      } else {
+        return 300;
+      }
+    }
+
+    function updateSpeedPhaseBanner() {
+      if (!speedPhaseBanner) return;
+      const elapsed = getElapsedSeconds();
+      if (elapsed < 20) {
+        speedPhaseBanner.textContent = '⚡ ช่วง 0–20 วินาที: ไฟติด 0.8 วินาที';
+        speedPhaseBanner.className = 'speed-phase-banner';
+      } else if (elapsed < 40) {
+        speedPhaseBanner.textContent = '🔥 ช่วง 21–40 วินาที: ไฟติด 0.5 วินาที (เร็วขึ้น!)';
+        speedPhaseBanner.className = 'speed-phase-banner phase-2';
+      } else {
+        speedPhaseBanner.textContent = '🚀 ช่วง 41–60 วินาที: ไฟติด 0.3 วินาที (สปีดสูงสุด!)';
+        speedPhaseBanner.className = 'speed-phase-banner phase-3';
+      }
+    }
+
     function clearAllLights() {
+      if (lightAutoMoveTimeout) {
+        clearTimeout(lightAutoMoveTimeout);
+        lightAutoMoveTimeout = null;
+      }
       activeLightIndex = -1;
+      isCurrentLightHit = false;
       lightButtons.forEach(btn => {
-        btn.classList.remove('lit');
+        btn.classList.remove('lit', 'wrong-tap');
         const labelEl = btn.querySelector('.light-btn-label');
         if (labelEl) labelEl.textContent = `ปุ่ม ${Number(btn.dataset.index) + 1}`;
       });
     }
 
+    function scheduleAutoLightSwitch() {
+      if (lightAutoMoveTimeout) {
+        clearTimeout(lightAutoMoveTimeout);
+        lightAutoMoveTimeout = null;
+      }
+      if (!isPlaying) return;
+
+      const durationMs = getCurrentLightDurationMs();
+      lightAutoMoveTimeout = setTimeout(() => {
+        if (!isPlaying) return;
+        // ถ้าไม่กดทันภายในเวลาที่กำหนด ไฟจะดับและสุ่มปุ่มใหม่โดยอัตโนมัติ
+        activateRandomLight(true);
+      }, durationMs);
+    }
+
     function activateRandomLight(excludeCurrent = true) {
+      if (!isPlaying) return;
+
       const total = lightButtons.length; // 5 ปุ่ม
       let nextIndex = Math.floor(Math.random() * total);
 
-      // เมื่อกดถูกแล้ว ให้ไฟย้ายไปยังปุ่มอื่นแบบสุ่มทันที
+      // สุ่มไปยังปุ่มใหม่ที่ไม่ซ้ำกับปุ่มเดิมเพื่อให้เห็นการย้ายตำแหน่งชัดเจน
       if (excludeCurrent && total > 1 && activeLightIndex !== -1) {
         const candidates = [];
         for (let i = 0; i < total; i++) {
@@ -1659,8 +1700,11 @@ body {
       }
 
       activeLightIndex = nextIndex;
+      isCurrentLightHit = false;
+
       lightButtons.forEach((btn, idx) => {
         const labelEl = btn.querySelector('.light-btn-label');
+        btn.classList.remove('wrong-tap');
         if (idx === activeLightIndex) {
           btn.classList.add('lit');
           if (labelEl) labelEl.textContent = 'กดเลย!';
@@ -1669,17 +1713,30 @@ body {
           if (labelEl) labelEl.textContent = `ปุ่ม ${idx + 1}`;
         }
       });
+
+      // ตั้งเวลาไฟดับและสุ่มปุ่มใหม่อัตโนมัติหากกดไม่ทัน (0.8s / 0.5s / 0.3s)
+      scheduleAutoLightSwitch();
     }
 
     function handleLightButtonTap(e, btnIndex, btnElement) {
       if (!isPlaying) return;
       e.preventDefault();
 
-      // กติกาข้อ 3-5: ผู้เล่นต้องกดปุ่มที่กำลังมีแสงเท่านั้นจึงจะได้ +1 คะแนน และไฟจะย้ายไปปุ่มอื่นแบบสุ่ม
-      if (btnIndex !== activeLightIndex) {
+      // กติกา: กดปุ่มที่ไม่มีไฟ ไม่ได้คะแนน และห้ามกดรัวเพื่อสะสมคะแนน
+      if (btnIndex !== activeLightIndex || isCurrentLightHit) {
+        btnElement.classList.add('wrong-tap');
+        setTimeout(() => btnElement.classList.remove('wrong-tap'), 120);
         return;
       }
 
+      // ล็อกทันทีว่าไฟดวงนี้ถูกกดแล้ว และล้างตัวจับเวลาไฟดับอัตโนมัติของรอบนี้
+      isCurrentLightHit = true;
+      if (lightAutoMoveTimeout) {
+        clearTimeout(lightAutoMoveTimeout);
+        lightAutoMoveTimeout = null;
+      }
+
+      // กดโดนไฟเท่านั้น +1 คะแนน
       score++;
       scoreDisplay.textContent = score.toLocaleString();
       playTapSound();
@@ -1703,7 +1760,7 @@ body {
       buttonContainer.appendChild(plus);
       setTimeout(() => plus.remove(), 550);
 
-      // ย้ายไฟไปยังปุ่มอื่นแบบสุ่มทันที
+      // เมื่อกดโดนไฟ ไฟจะย้ายไปปุ่มใหม่ทันที!
       activateRandomLight(true);
     }
 
@@ -1746,12 +1803,14 @@ body {
       score = 0;
       timeLeft = GAME_DURATION;
       isPlaying = true;
+      gameStartTimeMs = performance.now();
 
       scoreDisplay.textContent = '0';
       timeDisplay.textContent = GAME_DURATION.toFixed(1);
       timeDisplay.classList.remove('timer-warning');
       progressBar.style.width = '100%';
       playerActiveLabel.textContent = currentPlayer;
+      updateSpeedPhaseBanner();
 
       playStartSound();
       startBackgroundMusic();
@@ -1763,14 +1822,14 @@ body {
 
       syncPlayerScore(currentSessionId, currentPlayer, 0, 'playing');
 
-      const startTime = performance.now();
       let lastSyncSecond = 0;
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
-        const elapsed = (performance.now() - startTime) / 1000;
+        const elapsed = (performance.now() - gameStartTimeMs) / 1000;
         timeLeft = Math.max(0, GAME_DURATION - elapsed);
         timeDisplay.textContent = timeLeft.toFixed(1);
         progressBar.style.width = `${(timeLeft / GAME_DURATION) * 100}%`;
+        updateSpeedPhaseBanner();
 
         const wholeSec = Math.floor(elapsed);
         if (wholeSec > lastSyncSecond) {
@@ -1844,20 +1903,6 @@ body {
       switchScreen(resultScreen);
     }
 
-    // ฟังก์ชันดาวน์โหลดไฟล์ HTML ลงเครื่องโดยตรง (ตั้งชื่อเป็น index.html เพื่อนำไปอัปโหลดขึ้น GitHub Pages ได้ทันที)
-    function downloadSelfAsHtmlFile() {
-      const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'index.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
     // ==========================================
     // การผูก Event Listeners
     // ==========================================
@@ -1889,10 +1934,6 @@ body {
         startBackgroundMusic();
       }
     });
-
-    if (downloadHtmlBtn) {
-      downloadHtmlBtn.addEventListener('click', downloadSelfAsHtmlFile);
-    }
 
     tabPlayerBtn.addEventListener('click', () => {
       tabPlayerBtn.classList.add('active');
