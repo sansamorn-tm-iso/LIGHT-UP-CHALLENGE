@@ -506,7 +506,7 @@ body {
   transform: scale(1.15);
 }
 
-/* เอฟเฟกต์กดปุ่มที่ไม่มีไฟ (ไม่ได้คะแนน) */
+/* เอฟเฟกต์กดปุ่มที่ไม่มีไฟ (0 คะแนน) */
 .light-btn.wrong-tap {
   border-color: #EF4444;
   box-shadow: 0 4px 0 #7F1D1D, 0 0 14px rgba(239, 68, 68, 0.5);
@@ -861,7 +861,7 @@ body {
   <div class="app-container">
     <!-- แถบด้านบน -->
     <div class="top-bar">
-      <span class="badge">💡 แข่งขัน 60 วินาที</span>
+      <span class="badge">💡 แข่งขัน 1 นาที (60 วินาที)</span>
       <div class="top-bar-actions">
         <button id="soundToggleBtn" class="sound-btn" title="เปิด/ปิดเสียงเพลงและเอฟเฟกต์">🔊</button>
       </div>
@@ -883,7 +883,7 @@ body {
   </div>
 </div>
 
-<!-- หน้าจอที่ 1: ผู้เข้าแข่งขันลงทะเบียนชื่อและรอแอดมินกดเริ่มเกม (ตัดกล่องกติกาออกตามที่ขอ) -->
+<!-- หน้าจอที่ 1: ผู้เข้าแข่งขันลงทะเบียนชื่อและรอแอดมินกดเริ่มเกม -->
 <div id="startScreen" class="screen active">
   <div id="registerFormBox">
     <div class="input-group">
@@ -922,7 +922,7 @@ body {
   </div>
 
   <div id="speedPhaseBanner" class="speed-phase-banner">
-    ⚡ ช่วงที่ 1 (0–20 วินาที): ไฟติดนาน 0.8 วินาที
+    ⚡ ช่วง 0–20 วินาที: ไฟติด 1.2 วินาที
   </div>
 
   <div class="active-player-banner">
@@ -966,7 +966,7 @@ body {
     <div style="font-size: 2.5rem; margin-bottom: 4px;">🎉</div>
     <div id="finalPlayerName" style="font-weight: 800; font-size: 1.3rem; color: #1E1B4B;">ยอดเยี่ยมมาก!</div>
     <div id="finalScore" class="result-score">0</div>
-    <div style="font-weight: 800; margin-bottom: 10px; color: #475569;">คะแนน ในเวลา 60 วินาที</div>
+    <div style="font-weight: 800; margin-bottom: 10px; color: #475569;">คะแนน ในเวลา 1 นาที</div>
     <span id="finalCps" class="cps-badge">ความเร็วเฉลี่ย 0.0 ครั้ง/วินาที</span>
     <p style="margin-top: 14px; font-size: 0.95rem; color: #6B21A8; font-weight: 600;">
       ✨ ส่งคะแนนเข้าสู่หน้าจอแอดมินเรียบร้อยแล้ว! รอลุ้นผลผู้ชนะบนจอหลักได้เลย ✨
@@ -976,7 +976,7 @@ body {
   <button id="playAgainBtn" class="btn-primary" type="button">🔄 เตรียมพร้อมรอบถัดไป</button>
 </div>
 
-<!-- หน้าจอที่ 4: หน้าจอแอดมินขนาดใหญ่สำหรับจอคอมพิวเตอร์ (คงเดิมทุกประการ) -->
+<!-- หน้าจอที่ 4: หน้าจอแอดมินขนาดใหญ่สำหรับจอคอมพิวเตอร์ -->
 <div id="adminScreen" class="screen">
   <div class="admin-grid">
     <!-- คอลัมน์ซ้าย: โชว์เฉพาะ QR Code สำหรับสแกนเข้าเล่น -->
@@ -1258,14 +1258,17 @@ body {
     }
 
     // ==========================================
-    // ตัวแปรควบคุมเกม & ระบบซิงค์หลายเครื่อง (Real-Time Dual-MQTT + GunDB)
+    // ตัวแปรควบคุมเกม & ระบบซิงค์หลายเครื่อง + ระบบล้างข้อมูลเริ่มใหม่ทั้งหมด (Reset Timestamp)
     // ==========================================
-    const GAME_DURATION = 60; // 60 วินาที
+    const GAME_DURATION = 60; // 60 วินาที (1 นาที)
     const urlParams = new URLSearchParams(window.location.search);
-    const currentRoom = 'MAIN';
+    const currentRoom = 'MAIN_V2';
     const roleParam = urlParams.get('role') || (urlParams.get('admin') === '1' ? 'admin' : '');
 
-    const STORAGE_KEY = 'light_up_challenge_room_' + currentRoom;
+    const STORAGE_KEY = 'light_up_challenge_v2_room_' + currentRoom;
+    const CLEAR_TS_KEY = 'light_up_challenge_v2_clear_ts_' + currentRoom;
+
+    let lastClearedTimestamp = Number(localStorage.getItem(CLEAR_TS_KEY) || 0);
     let currentPlayer = '';
     let currentSessionId = null;
     let isPlayerReady = false;
@@ -1285,6 +1288,7 @@ body {
     const mqttClients = [];
     let gun = null;
     let roomNode = null;
+    let roomMetaNode = null;
 
     // อ้างอิง DOM
     const appContainer = document.querySelector('.app-container');
@@ -1335,7 +1339,7 @@ body {
     }
 
     function getRoomTopic() {
-      return 'hsf_rainbow_2025_room/' + currentRoom;
+      return 'luc_challenge_2025_room/' + currentRoom;
     }
 
     function getPlayerShareUrl() {
@@ -1354,6 +1358,65 @@ body {
           syncStatusBadge.classList.remove('online');
         }
       }
+    }
+
+    function isRecordValidAfterClear(rec) {
+      if (!rec || rec.deleted) return false;
+      const recTime = Number(rec.updatedAt || rec.joinedAt || 0);
+      if (lastClearedTimestamp > 0 && recTime > 0 && recTime <= lastClearedTimestamp) {
+        return false;
+      }
+      return true;
+    }
+
+    function applyRoomResetState(clearTimestamp) {
+      const ts = Number(clearTimestamp) || Date.now();
+      if (ts > lastClearedTimestamp) {
+        lastClearedTimestamp = ts;
+        try {
+          localStorage.setItem(CLEAR_TS_KEY, String(lastClearedTimestamp));
+        } catch (e) {}
+      }
+
+      // ล้างรายชื่อและคะแนนเดิมทั้งหมดในหน่วยความจำและ LocalStorage
+      remotePlayersMap = {};
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+
+      // หยุดจับเวลาแอดมินและตั้งค่าหน้าจอแอดมินกลับเป็นเริ่มต้นใหม่ทั้งหมด
+      if (adminTimerInterval) {
+        clearInterval(adminTimerInterval);
+        adminTimerInterval = null;
+      }
+      isAdminRunningTimer = false;
+      isScoreRevealed = false;
+      if (adminTimerDisplay) adminTimerDisplay.textContent = `${GAME_DURATION.toFixed(1)} วินาที`;
+      if (adminStartGameBtn) adminStartGameBtn.textContent = '🚀 กดเริ่มเกมพร้อมกันทุกคน!';
+      updateScoreVisibilityUI();
+
+      // หากผู้เล่นกำลังอยู่ในหน้าลงทะเบียนหรือหน้าสรุปผล ให้รีเซ็ตกลับไปหน้ากรอกชื่อใหม่
+      if (!adminScreen.classList.contains('active')) {
+        if (isPlaying) {
+          isPlaying = false;
+          clearInterval(timerInterval);
+          clearAllLights();
+        }
+        stopBackgroundMusic();
+        currentPlayer = '';
+        currentSessionId = null;
+        isPlayerReady = false;
+        score = 0;
+        if (scoreDisplay) scoreDisplay.textContent = '0';
+        if (timeDisplay) timeDisplay.textContent = GAME_DURATION.toFixed(1);
+        if (registerFormBox) registerFormBox.style.display = 'block';
+        if (waitingAdminBox) waitingAdminBox.style.display = 'none';
+        switchScreen(startScreen);
+      } else {
+        stopBackgroundMusic();
+      }
+
+      renderAdminLeaderboard();
     }
 
     function initRealtimeBrokers() {
@@ -1418,8 +1481,14 @@ body {
     function handleIncomingRealtimePacket(msg) {
       if (!msg || msg.room !== currentRoom) return;
 
+      if (msg.type === 'clear_room') {
+        applyRoomResetState(msg.clearedAt || Date.now());
+        return;
+      }
+
       if (msg.type === 'score_update' && msg.record && msg.record.id) {
         const rec = msg.record;
+        if (!isRecordValidAfterClear(rec)) return;
         const existing = remotePlayersMap[rec.id];
         if (!existing || rec.score >= existing.score || rec.status === 'finished' || rec.status === 'ready') {
           remotePlayersMap[rec.id] = rec;
@@ -1431,18 +1500,27 @@ body {
         if ((isPlayerReady || currentPlayer) && !isPlaying && !adminScreen.classList.contains('active')) {
           beginPlayerGameplay();
         }
-      } else if (msg.type === 'clear_room') {
-        remotePlayersMap = {};
-        localStorage.removeItem(STORAGE_KEY);
-        renderAdminLeaderboard();
       } else if (msg.type === 'sync_request') {
-        Object.values(remotePlayersMap).forEach(rec => {
+        if (lastClearedTimestamp > 0) {
           publishPacket({
-            type: 'score_update',
+            type: 'clear_sync_info',
             room: currentRoom,
-            record: rec
+            clearedAt: lastClearedTimestamp
           });
+        }
+        Object.values(remotePlayersMap).forEach(rec => {
+          if (isRecordValidAfterClear(rec)) {
+            publishPacket({
+              type: 'score_update',
+              room: currentRoom,
+              record: rec
+            });
+          }
         });
+      } else if (msg.type === 'clear_sync_info' && msg.clearedAt) {
+        if (Number(msg.clearedAt) > lastClearedTimestamp) {
+          applyRoomResetState(Number(msg.clearedAt));
+        }
       }
     }
 
@@ -1451,7 +1529,9 @@ body {
         const localRaw = localStorage.getItem(STORAGE_KEY);
         const localArr = localRaw ? JSON.parse(localRaw) : [];
         localArr.forEach(item => {
-          if (item && item.id) remotePlayersMap[item.id] = item;
+          if (item && item.id && isRecordValidAfterClear(item)) {
+            remotePlayersMap[item.id] = item;
+          }
         });
       } catch (e) {}
 
@@ -1459,18 +1539,37 @@ body {
       qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(playerJoinUrl)}`;
 
       if (gun) {
-        roomNode = gun.get('hsf_rainbow_2025_' + currentRoom).get('players');
+        const baseNode = gun.get('luc_challenge_2025_' + currentRoom);
+        roomNode = baseNode.get('players');
+        roomMetaNode = baseNode.get('meta');
+
+        // ซิงค์เวลาที่สั่งล้างข้อมูลล่าสุดจาก GunDB เพื่อไม่ให้ข้อมูลเก่าไหลกลับมาอีก
+        roomMetaNode.get('clearedAt').on((ts) => {
+          const numTs = Number(ts || 0);
+          if (numTs > lastClearedTimestamp) {
+            applyRoomResetState(numTs);
+          }
+        });
+
         roomNode.map().on((data, key) => {
           if (!data || data.deleted) {
             delete remotePlayersMap[key];
           } else if (data.name && typeof data.score === 'number') {
-            remotePlayersMap[key] = {
+            const candidate = {
               id: key,
               name: data.name,
               score: data.score,
               cps: data.cps || (data.score / GAME_DURATION).toFixed(2),
-              status: data.status || 'finished'
+              status: data.status || 'finished',
+              joinedAt: data.joinedAt || 0,
+              updatedAt: data.updatedAt || data.joinedAt || 0
             };
+            // กรองข้อมูลเก่าที่ถูกสร้างก่อนการกดล้างข้อมูลทิ้งทั้งหมด
+            if (isRecordValidAfterClear(candidate)) {
+              remotePlayersMap[key] = candidate;
+            } else {
+              delete remotePlayersMap[key];
+            }
           }
           persistLocalCache();
           renderAdminLeaderboard();
@@ -1486,7 +1585,7 @@ body {
     }
 
     function getLeaderboard() {
-      const list = Object.values(remotePlayersMap);
+      const list = Object.values(remotePlayersMap).filter(isRecordValidAfterClear);
       if (isScoreRevealed) {
         list.sort((a, b) => b.score - a.score);
       } else {
@@ -1496,6 +1595,7 @@ body {
     }
 
     function syncPlayerScore(id, name, playerScore, statusText) {
+      const now = Date.now();
       const existing = remotePlayersMap[String(id)];
       const record = {
         id: String(id),
@@ -1503,8 +1603,8 @@ body {
         score: playerScore,
         cps: (playerScore / GAME_DURATION).toFixed(2),
         status: statusText || 'finished',
-        joinedAt: existing && existing.joinedAt ? existing.joinedAt : Date.now(),
-        updatedAt: Date.now()
+        joinedAt: existing && existing.joinedAt && existing.joinedAt > lastClearedTimestamp ? existing.joinedAt : now,
+        updatedAt: now
       };
       remotePlayersMap[record.id] = record;
       persistLocalCache();
@@ -1590,19 +1690,30 @@ body {
       });
     }
 
+    // ล้างข้อมูลเริ่มรอบใหม่ทั้งหมด (ลบทั้งในเว็บ LocalStorage, GunDB และส่งคำสั่งรีเซ็ตไปทุกเครื่อง)
     function clearLeaderboard() {
       if (confirm('ต้องการล้างรายชื่อและคะแนนทั้งหมดเพื่อเริ่มรอบใหม่ใช่หรือไม่?')) {
-        Object.keys(remotePlayersMap).forEach(key => {
-          if (roomNode) {
-            roomNode.get(key).put({ deleted: true });
-          }
-        });
-        remotePlayersMap = {};
-        localStorage.removeItem(STORAGE_KEY);
-        isScoreRevealed = false;
-        updateScoreVisibilityUI();
-        publishPacket({ type: 'clear_room', room: currentRoom });
-        renderAdminLeaderboard();
+        const clearTs = Date.now();
+        const existingKeys = Object.keys(remotePlayersMap);
+
+        // ลบข้อมูลเดิมใน GunDB และบันทึกเวลาที่ล้างข้อมูลล่าสุด
+        if (roomMetaNode) {
+          roomMetaNode.get('clearedAt').put(clearTs);
+        }
+        if (roomNode) {
+          existingKeys.forEach(key => {
+            roomNode.get(key).put({ deleted: true, updatedAt: clearTs });
+          });
+        }
+
+        // รีเซ็ตสถานะในหน้าเว็บนี้ทันที
+        applyRoomResetState(clearTs);
+
+        // ส่งสัญญาณบอกทุกเครื่องที่เปิดเว็บอยู่ให้ล้างข้อมูลพร้อมกัน
+        publishPacket({ type: 'clear_room', room: currentRoom, clearedAt: clearTs });
+        setTimeout(() => {
+          publishPacket({ type: 'clear_room', room: currentRoom, clearedAt: clearTs });
+        }, 250);
       }
     }
 
@@ -1618,25 +1729,25 @@ body {
     }
 
     // ==========================================
-    // ระบบสุ่มเปิดไฟปุ่ม 1 ใน 5 ปุ่ม + เพิ่มความยากตามช่วงเวลา (0.8s / 0.5s / 0.3s)
+    // ระบบสุ่มเปิดไฟปุ่ม 1 ใน 5 ปุ่ม + ระยะเวลาไฟติด 3 ช่วงเวลา (1.2s / 0.9s / 0.7s)
     // ==========================================
     function getElapsedSeconds() {
       if (!isPlaying || !gameStartTimeMs) return 0;
       return (performance.now() - gameStartTimeMs) / 1000;
     }
 
-    // คำนวณเวลาที่ไฟติดในแต่ละช่วงเวลา:
-    // ช่วง 0–20 วินาที: 0.8 วินาที (800 ms)
-    // ช่วง 21–40 วินาที: 0.5 วินาที (500 ms)
-    // ช่วง 41–60 วินาที: 0.3 วินาที (300 ms)
+    // ระยะเวลาไฟติดแต่ละช่วง:
+    // 0–20 วินาที: 1.2 วินาที (1200 ms)
+    // 21–40 วินาที: 0.9 วินาที (900 ms)
+    // 41–60 วินาที: 0.7 วินาที (700 ms)
     function getCurrentLightDurationMs() {
       const elapsed = getElapsedSeconds();
       if (elapsed < 20) {
-        return 800;
+        return 1200;
       } else if (elapsed < 40) {
-        return 500;
+        return 900;
       } else {
-        return 300;
+        return 700;
       }
     }
 
@@ -1644,13 +1755,13 @@ body {
       if (!speedPhaseBanner) return;
       const elapsed = getElapsedSeconds();
       if (elapsed < 20) {
-        speedPhaseBanner.textContent = '⚡ ช่วง 0–20 วินาที: ไฟติด 0.8 วินาที';
+        speedPhaseBanner.textContent = '⚡ ช่วง 0–20 วินาที: ไฟติด 1.2 วินาที';
         speedPhaseBanner.className = 'speed-phase-banner';
       } else if (elapsed < 40) {
-        speedPhaseBanner.textContent = '🔥 ช่วง 21–40 วินาที: ไฟติด 0.5 วินาที (เร็วขึ้น!)';
+        speedPhaseBanner.textContent = '🔥 ช่วง 21–40 วินาที: ไฟติด 0.9 วินาที (เร็วขึ้น!)';
         speedPhaseBanner.className = 'speed-phase-banner phase-2';
       } else {
-        speedPhaseBanner.textContent = '🚀 ช่วง 41–60 วินาที: ไฟติด 0.3 วินาที (สปีดสูงสุด!)';
+        speedPhaseBanner.textContent = '🚀 ช่วง 41–60 วินาที: ไฟติด 0.7 วินาที (สปีดสูงสุด!)';
         speedPhaseBanner.className = 'speed-phase-banner phase-3';
       }
     }
@@ -1679,7 +1790,7 @@ body {
       const durationMs = getCurrentLightDurationMs();
       lightAutoMoveTimeout = setTimeout(() => {
         if (!isPlaying) return;
-        // ถ้าไม่กดทันภายในเวลาที่กำหนด ไฟจะดับและสุ่มปุ่มใหม่โดยอัตโนมัติ
+        // ถ้าไม่กดทัน ไฟจะดับและสุ่มปุ่มใหม่โดยอัตโนมัติ
         activateRandomLight(true);
       }, durationMs);
     }
@@ -1714,7 +1825,7 @@ body {
         }
       });
 
-      // ตั้งเวลาไฟดับและสุ่มปุ่มใหม่อัตโนมัติหากกดไม่ทัน (0.8s / 0.5s / 0.3s)
+      // ตั้งเวลาไฟดับและสุ่มปุ่มใหม่อัตโนมัติหากกดไม่ทัน (1.2s / 0.9s / 0.7s)
       scheduleAutoLightSwitch();
     }
 
@@ -1722,7 +1833,7 @@ body {
       if (!isPlaying) return;
       e.preventDefault();
 
-      // กติกา: กดปุ่มที่ไม่มีไฟ ไม่ได้คะแนน และห้ามกดรัวเพื่อสะสมคะแนน
+      // กดปุ่มไม่มีไฟ = 0 คะแนน
       if (btnIndex !== activeLightIndex || isCurrentLightHit) {
         btnElement.classList.add('wrong-tap');
         setTimeout(() => btnElement.classList.remove('wrong-tap'), 120);
@@ -1736,7 +1847,7 @@ body {
         lightAutoMoveTimeout = null;
       }
 
-      // กดโดนไฟเท่านั้น +1 คะแนน
+      // กดโดนปุ่มที่มีไฟ = +1 คะแนน
       score++;
       scoreDisplay.textContent = score.toLocaleString();
       playTapSound();
