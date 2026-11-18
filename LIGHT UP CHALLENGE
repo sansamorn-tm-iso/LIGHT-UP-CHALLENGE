@@ -674,7 +674,7 @@ body {
   transform: translateY(4px);
 }
 
-/* ตารางรายชื่อผู้เข้าแข่งขันและอันดับคะแนน (แสดงรายชื่อครบทุกคนและมีแถบเลื่อนชัดเจน) */
+/* ตารางรายชื่อผู้เข้าแข่งขันและอันดับคะแนน (ซ่อนไว้จนกว่าจะกดปุ่มโชว์คะแนน) */
 .leaderboard-section {
   background: #FFFFFF;
   border-radius: 22px;
@@ -760,6 +760,7 @@ body {
 .leaderboard-item.rank-top-1 {
   background: linear-gradient(90deg, #FEF9C3, #FDE047);
   border-color: #EAB308;
+  box-shadow: 0 6px 18px rgba(234, 179, 8, 0.28);
 }
 
 .rank-badge {
@@ -805,14 +806,6 @@ body {
   text-align: right;
 }
 
-.score-masked {
-  color: #7C3AED;
-  background: #F3E8FF;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 0.95rem;
-}
-
 .status-playing {
   font-size: 0.85rem;
   background: #DCFCE7;
@@ -842,14 +835,22 @@ body {
 
 .hidden-score-placeholder {
   text-align: center;
-  padding: 12px 16px;
-  margin-bottom: 12px;
-  background: linear-gradient(135deg, #FAF5FF, #FFF1F2);
-  border-radius: 14px;
-  border: 2px dashed #F472B6;
-  color: #831843;
-  font-size: 0.95rem;
+  padding: 38px 20px;
+  margin-bottom: 6px;
+  background: linear-gradient(135deg, #1E1B4B, #311042, #0F172A);
+  border-radius: 20px;
+  border: 3px dashed #F472B6;
+  color: #FFFFFF;
+  font-size: 1.08rem;
   font-weight: 600;
+  box-shadow: inset 0 0 30px rgba(236, 72, 153, 0.25);
+}
+
+.hidden-stage-icon {
+  font-size: 3.4rem;
+  display: inline-block;
+  margin-bottom: 10px;
+  animation: pulse 0.75s infinite alternate;
 }
 
 
@@ -987,7 +988,7 @@ body {
       <button id="copyLinkBtn" class="btn-secondary" type="button" style="width: 100%; margin-top: 6px;">🔗 คัดลอกลิงก์ให้ผู้เข้าแข่งขัน</button>
     </div>
 
-    <!-- คอลัมน์ขวา: แผงควบคุมแอดมิน (กดเริ่มเกม, กดโชว์คะแนน, เสียงปรบมือวี้ดวิ้ว) -->
+    <!-- คอลัมน์ขวา: แผงควบคุมแอดมิน (กดเริ่มเกม, กดโชว์คะแนน, เสียงปรบมือดังสนั่นแบบเกมโชว์) -->
     <div class="admin-control-panel">
       <div class="admin-status-banner">
         <div>
@@ -1005,18 +1006,24 @@ body {
         <button id="adminRevealScoreBtn" class="btn-admin-reveal" type="button">🏆 กดโชว์คะแนน & ประกาศผล!</button>
       </div>
 
-      <!-- ส่วนแสดงรายชื่อผู้เข้าแข่งขันครบทุกคนพร้อมแถบเลื่อน -->
+      <!-- ส่วนแสดงรายชื่อและอันดับคะแนน (ซ่อนไว้ทั้งหมดจนกว่าแอดมินจะกดปุ่มโชว์คะแนน) -->
       <div class="leaderboard-section">
         <div class="leaderboard-header">
-          <span id="adminBoardTitle" class="leaderboard-title">👑 รายชื่อผู้เข้าแข่งขันทั้งหมด (<span id="adminListCount">0</span> คน)</span>
+          <span id="adminBoardTitle" class="leaderboard-title">🏆 ตารางประกาศผลผู้เข้าแข่งขัน (<span id="adminListCount">0</span> คน)</span>
           <button id="clearBoardBtnAdmin" class="clear-btn" type="button">🗑️ ล้างข้อมูลเริ่มรอบใหม่</button>
         </div>
 
         <div id="scoreHiddenNotice" class="hidden-score-placeholder">
-          🙈✨ <b>แสดงรายชื่อผู้เข้าแข่งขันครบทุกคนแล้ว!</b> (ซ่อนตัวเลขคะแนนไว้ชั่วคราว — กดปุ่ม <b>"🏆 กดโชว์คะแนน & ประกาศผล!"</b> ด้านบนเพื่อเปิดเผยคะแนนและจัดอันดับพร้อมเสียงเฮดีใจปรบมือ!)
+          <div class="hidden-stage-icon">🎬🏆✨</div>
+          <div style="font-size: 1.25rem; font-weight: 800; color: #FEF08A; margin-bottom: 6px;">
+            ซ่อนรายชื่อและคะแนนผู้เข้าแข่งขันไว้เพื่อความตื่นเต้น!
+          </div>
+          <div style="color: #FBCFE8; font-weight: 600;">
+            กดปุ่ม <b>"🏆 กดโชว์คะแนน & ประกาศผล!"</b> ด้านบน เพื่อเปิดเผยรายชื่อและอันดับคะแนนพร้อมเสียงปรบมือดังสนั่นแบบรายการเกมโชว์!
+          </div>
         </div>
 
-        <ul id="adminLeaderboard" class="leaderboard-list"></ul>
+        <ul id="adminLeaderboard" class="leaderboard-list" style="display: none;"></ul>
       </div>
     </div>
   </div>
@@ -1025,7 +1032,7 @@ body {
 
   <script>
     // ==========================================
-    // ระบบเสียงเอฟเฟกต์ เพลงประกอบ และเสียงปรบมือวี้ดวิ้ว (Web Audio API)
+    // ระบบเสียงเอฟเฟกต์ เพลงประกอบ และเสียงปรบมือดังสนั่นแบบรายการเกมโชว์ถ่ายทอดสด (Web Audio API)
     // ==========================================
     let soundEnabled = true;
     let audioCtx = null;
@@ -1137,89 +1144,131 @@ body {
       });
     }
 
-    // เสียงเฮดีใจ (Crowd Cheer "เฮ้! / เย้!") + เสียงปรบมือรัวๆ + แตรฉลองชัยชนะ!
+    // เสียงปรบมือดังสนั่นสตูดิโอ + กลองรัวเปิดตัว + แตรブラสเกมโชว์ถ่ายทอดสดการแข่งขัน!
     function playCheerAndApplauseSound() {
       if (!soundEnabled) return;
       initAudio();
       const now = audioCtx.currentTime;
 
-      const cheerDuration = 2.8;
-      const roarSize = Math.floor(audioCtx.sampleRate * cheerDuration);
-      const roarBuffer = audioCtx.createBuffer(1, roarSize, audioCtx.sampleRate);
-      const roarData = roarBuffer.getChannelData(0);
-      let lastOut = 0.0;
-      for (let i = 0; i < roarSize; i++) {
-        const white = Math.random() * 2 - 1;
-        roarData[i] = (lastOut + (0.04 * white)) / 1.04;
-        lastOut = roarData[i];
-        roarData[i] *= 2.8;
+      // สร้าง DynamicsCompressor เพื่อให้เสียงปรบมือและแตรเกมโชว์ดังแน่นเต็มอารมณ์แต่ไม่แตก
+      const masterCompressor = audioCtx.createDynamicsCompressor();
+      masterCompressor.threshold.setValueAtTime(-14, now);
+      masterCompressor.knee.setValueAtTime(20, now);
+      masterCompressor.ratio.setValueAtTime(6, now);
+      masterCompressor.attack.setValueAtTime(0.003, now);
+      masterCompressor.release.setValueAtTime(0.2, now);
+      masterCompressor.connect(audioCtx.destination);
+
+      // 1. เสียงกลองรัวตื่นเต้นก่อนเปิดป้ายคะแนน (TV Show Drumroll & Cymbal Crash: 0.0s - 0.55s)
+      const rollHits = 14;
+      for (let r = 0; r < rollHits; r++) {
+        const hitTime = now + (r * 0.036);
+        const snareSize = Math.floor(audioCtx.sampleRate * 0.05);
+        const snareBuf = audioCtx.createBuffer(1, snareSize, audioCtx.sampleRate);
+        const snareData = snareBuf.getChannelData(0);
+        for (let i = 0; i < snareSize; i++) {
+          snareData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.015));
+        }
+        const snareSrc = audioCtx.createBufferSource();
+        snareSrc.buffer = snareBuf;
+
+        const snareFilter = audioCtx.createBiquadFilter();
+        snareFilter.type = 'highpass';
+        snareFilter.frequency.setValueAtTime(350, hitTime);
+
+        const snareGain = audioCtx.createGain();
+        const crescendo = 0.12 + (r / rollHits) * 0.35;
+        snareGain.gain.setValueAtTime(crescendo, hitTime);
+        snareGain.gain.exponentialRampToValueAtTime(0.001, hitTime + 0.048);
+
+        snareSrc.connect(snareFilter);
+        snareFilter.connect(snareGain);
+        snareGain.connect(masterCompressor);
+        snareSrc.start(hitTime);
+        snareSrc.stop(hitTime + 0.05);
       }
 
-      const roarSource = audioCtx.createBufferSource();
-      roarSource.buffer = roarBuffer;
+      // เสียงฉาบเปิดตัวอย่างยิ่งใหญ่ (Grand Cymbal Crash ที่วินาที 0.52)
+      const revealTime = now + 0.52;
+      const crashDuration = 2.2;
+      const crashSize = Math.floor(audioCtx.sampleRate * crashDuration);
+      const crashBuf = audioCtx.createBuffer(1, crashSize, audioCtx.sampleRate);
+      const crashData = crashBuf.getChannelData(0);
+      for (let i = 0; i < crashSize; i++) {
+        crashData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.55));
+      }
+      const crashSrc = audioCtx.createBufferSource();
+      crashSrc.buffer = crashBuf;
+      const crashFilter = audioCtx.createBiquadFilter();
+      crashFilter.type = 'highpass';
+      crashFilter.frequency.setValueAtTime(3200, revealTime);
+      const crashGain = audioCtx.createGain();
+      crashGain.gain.setValueAtTime(0.38, revealTime);
+      crashGain.gain.exponentialRampToValueAtTime(0.001, revealTime + crashDuration);
+      crashSrc.connect(crashFilter);
+      crashFilter.connect(crashGain);
+      crashGain.connect(masterCompressor);
+      crashSrc.start(revealTime);
+      crashSrc.stop(revealTime + crashDuration);
 
-      const roarFilter = audioCtx.createBiquadFilter();
-      roarFilter.type = 'bandpass';
-      roarFilter.frequency.setValueAtTime(550, now);
-      roarFilter.frequency.linearRampToValueAtTime(950, now + 0.6);
-      roarFilter.frequency.exponentialRampToValueAtTime(650, now + cheerDuration);
-      roarFilter.Q.setValueAtTime(1.2, now);
+      // 2. เสียงแตรวงออเคสตราเกมโชว์ถ่ายทอดสด (TV Game Show Championship Brass Fanfare)
+      const fanfareTimeline = [
+        { notes: [523.25, 659.25, 783.99], delay: 0.52, dur: 0.16 }, // C5 Major
+        { notes: [523.25, 659.25, 783.99], delay: 0.70, dur: 0.16 }, // C5 Major
+        { notes: [523.25, 659.25, 783.99], delay: 0.88, dur: 0.16 }, // C5 Major
+        { notes: [659.25, 783.99, 1046.50], delay: 1.08, dur: 0.42 }, // E5-G5-C6
+        { notes: [587.33, 739.99, 987.77], delay: 1.54, dur: 0.36 },  // D5-F#5-B5
+        { notes: [523.25, 659.25, 783.99, 1046.50, 1318.51], delay: 1.94, dur: 1.45 } // Grand Finale Chord
+      ];
 
-      const roarGain = audioCtx.createGain();
-      roarGain.gain.setValueAtTime(0.001, now);
-      roarGain.gain.linearRampToValueAtTime(0.32, now + 0.25);
-      roarGain.gain.setValueAtTime(0.30, now + 1.5);
-      roarGain.gain.exponentialRampToValueAtTime(0.001, now + cheerDuration);
+      fanfareTimeline.forEach((step) => {
+        const startT = now + step.delay;
+        step.notes.forEach((freq) => {
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const brassFilter = audioCtx.createBiquadFilter();
+          const noteGain = audioCtx.createGain();
 
-      roarSource.connect(roarFilter);
-      roarFilter.connect(roarGain);
-      roarGain.connect(audioCtx.destination);
-      roarSource.start(now);
-      roarSource.stop(now + cheerDuration);
+          osc1.type = 'sawtooth';
+          osc2.type = 'triangle';
+          osc1.frequency.setValueAtTime(freq, startT);
+          osc2.frequency.setValueAtTime(freq * 1.003, startT); // Detune เล็กน้อยให้เสียงแตรหนาแบบรายการทีวี
 
-      const voiceBaseFreqs = [190, 225, 270, 320, 380, 440];
-      voiceBaseFreqs.forEach((baseFreq, vIdx) => {
-        const vStart = now + (vIdx * 0.04);
-        const osc = audioCtx.createOscillator();
-        const f1 = audioCtx.createBiquadFilter();
-        const f2 = audioCtx.createBiquadFilter();
-        const vGain = audioCtx.createGain();
+          brassFilter.type = 'lowpass';
+          brassFilter.frequency.setValueAtTime(2800, startT);
 
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(baseFreq * 0.92, vStart);
-        osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.25, vStart + 0.35);
-        osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.15, vStart + 1.6);
+          noteGain.gain.setValueAtTime(0.001, startT);
+          noteGain.gain.linearRampToValueAtTime(0.18, startT + 0.025);
+          noteGain.gain.setValueAtTime(0.16, startT + step.dur * 0.7);
+          noteGain.gain.exponentialRampToValueAtTime(0.001, startT + step.dur);
 
-        f1.type = 'bandpass';
-        f1.frequency.setValueAtTime(650, vStart);
-        f1.Q.setValueAtTime(4.0, vStart);
+          osc1.connect(brassFilter);
+          osc2.connect(brassFilter);
+          brassFilter.connect(noteGain);
+          noteGain.connect(masterCompressor);
 
-        f2.type = 'bandpass';
-        f2.frequency.setValueAtTime(1850, vStart);
-        f2.Q.setValueAtTime(4.5, vStart);
-
-        vGain.gain.setValueAtTime(0.001, vStart);
-        vGain.gain.linearRampToValueAtTime(0.12, vStart + 0.15);
-        vGain.gain.setValueAtTime(0.10, vStart + 1.1);
-        vGain.gain.exponentialRampToValueAtTime(0.001, vStart + 1.9);
-
-        osc.connect(f1);
-        osc.connect(f2);
-        f1.connect(vGain);
-        f2.connect(vGain);
-        vGain.connect(audioCtx.destination);
-
-        osc.start(vStart);
-        osc.stop(vStart + 1.95);
+          osc1.start(startT);
+          osc2.start(startT);
+          osc1.stop(startT + step.dur + 0.02);
+          osc2.stop(startT + step.dur + 0.02);
+        });
       });
 
-      for (let i = 0; i < 60; i++) {
-        const clapTime = now + (i * 0.045) + (Math.random() * 0.035);
-        const bufferSize = Math.floor(audioCtx.sampleRate * 0.075);
+      // 3. เสียงปรบมือดังสนั่นฮอลล์ (Thunderous Studio Audience Applause - 220 Claps หนาแน่นต่อเนื่อง 4.8 วินาที)
+      const totalClaps = 220;
+      for (let i = 0; i < totalClaps; i++) {
+        // เริ่มปรบมือทันทีที่เปิดป้าย (0.50s) และรัวหนาแน่นยาวไปจนถึง 4.8 วินาที
+        const progress = i / totalClaps;
+        const clapTime = now + 0.48 + (progress * 4.2) + (Math.random() * 0.06);
+        const clapDur = 0.055 + (Math.random() * 0.035);
+        const bufferSize = Math.floor(audioCtx.sampleRate * clapDur);
         const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
+
         for (let j = 0; j < bufferSize; j++) {
-          output[j] = (Math.random() * 2 - 1) * Math.exp(-j / (audioCtx.sampleRate * 0.022));
+          // Envelope ของเสียงตบมือแต่ละครั้งให้คมชัดสมจริง
+          const env = Math.pow(1 - (j / bufferSize), 1.8);
+          output[j] = (Math.random() * 2 - 1) * env;
         }
 
         const whiteNoise = audioCtx.createBufferSource();
@@ -1227,34 +1276,59 @@ body {
 
         const filter = audioCtx.createBiquadFilter();
         filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(1000 + Math.random() * 650, clapTime);
-        filter.Q.setValueAtTime(1.6, clapTime);
+        // สุ่มความถี่เสียงตบมือของคนจำนวนมากในสตูดิโอ (850Hz - 2400Hz)
+        filter.frequency.setValueAtTime(850 + Math.random() * 1550, clapTime);
+        filter.Q.setValueAtTime(1.1 + Math.random() * 1.2, clapTime);
 
         const gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(0.28, clapTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, clapTime + 0.07);
+        // ดังกระหึ่มช่วง 0.5s - 3.5s แล้วค่อยๆ ซาลงตอนจบ
+        const fadeMultiplier = progress < 0.78 ? 1.0 : (1.0 - ((progress - 0.78) / 0.22));
+        const peakVol = (0.28 + Math.random() * 0.22) * Math.max(0.05, fadeMultiplier);
+        gain.gain.setValueAtTime(peakVol, clapTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, clapTime + clapDur);
 
         whiteNoise.connect(filter);
         filter.connect(gain);
-        gain.connect(audioCtx.destination);
+        gain.connect(masterCompressor);
 
         whiteNoise.start(clapTime);
-        whiteNoise.stop(clapTime + 0.075);
+        whiteNoise.stop(clapTime + clapDur + 0.005);
       }
 
-      const fanfare = [523.25, 659.25, 783.99, 1046.5];
-      fanfare.forEach((freq, idx) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-        gain.gain.setValueAtTime(0.18, now + idx * 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.55);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now + idx * 0.08);
-        osc.stop(now + idx * 0.08 + 0.58);
-      });
+      // 4. เสียงบรรยากาศผู้ชมปรบมือเกรียวกราวทั่วสตูดิโอ (Stadium Applause Bed & Crowd Excitement)
+      const bedDuration = 4.4;
+      const bedStart = now + 0.5;
+      const bedSize = Math.floor(audioCtx.sampleRate * bedDuration);
+      const bedBuffer = audioCtx.createBuffer(1, bedSize, audioCtx.sampleRate);
+      const bedData = bedBuffer.getChannelData(0);
+      let prevVal = 0;
+      for (let i = 0; i < bedSize; i++) {
+        const white = Math.random() * 2 - 1;
+        prevVal = (prevVal + (0.08 * white)) / 1.08;
+        // Modulate ความดังให้มีจังหวะกระเพื่อมเหมือนคนนับร้อยปรบมือพร้อมกัน
+        const pulseMod = 0.8 + 0.2 * Math.sin(i / (audioCtx.sampleRate * 0.018));
+        bedData[i] = prevVal * 3.2 * pulseMod;
+      }
+
+      const bedSource = audioCtx.createBufferSource();
+      bedSource.buffer = bedBuffer;
+
+      const bedBandpass = audioCtx.createBiquadFilter();
+      bedBandpass.type = 'bandpass';
+      bedBandpass.frequency.setValueAtTime(1250, bedStart);
+      bedBandpass.Q.setValueAtTime(0.75, bedStart);
+
+      const bedGain = audioCtx.createGain();
+      bedGain.gain.setValueAtTime(0.001, bedStart);
+      bedGain.gain.linearRampToValueAtTime(0.45, bedStart + 0.2);
+      bedGain.gain.setValueAtTime(0.42, bedStart + 3.0);
+      bedGain.gain.exponentialRampToValueAtTime(0.001, bedStart + bedDuration);
+
+      bedSource.connect(bedBandpass);
+      bedBandpass.connect(bedGain);
+      bedGain.connect(masterCompressor);
+      bedSource.start(bedStart);
+      bedSource.stop(bedStart + bedDuration);
     }
 
     // ==========================================
@@ -1586,11 +1660,7 @@ body {
 
     function getLeaderboard() {
       const list = Object.values(remotePlayersMap).filter(isRecordValidAfterClear);
-      if (isScoreRevealed) {
-        list.sort((a, b) => b.score - a.score);
-      } else {
-        list.sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
-      }
+      list.sort((a, b) => b.score - a.score);
       return list;
     }
 
@@ -1640,24 +1710,30 @@ body {
         adminListCount.textContent = list.length.toLocaleString();
       }
 
+      // ซ่อนหน้ารายชื่อผู้เข้าแข่งขันทั้งหมดไว้ก่อน จนกว่าแอดมินจะกดปุ่มโชว์คะแนน
+      if (!isScoreRevealed) {
+        adminLeaderboard.style.display = 'none';
+        adminLeaderboard.innerHTML = '';
+        return;
+      }
+
+      adminLeaderboard.style.display = 'block';
       adminLeaderboard.innerHTML = '';
 
       if (list.length === 0) {
-        adminLeaderboard.innerHTML = '<li style="text-align:center; color:#94A3B8; padding:28px;">ยังไม่มีรายชื่อผู้เข้าแข่งขันที่สแกนเข้ามา (เมื่อผู้เล่นลงทะเบียน รายชื่อทั้งหมดจะแสดงที่นี่ทันที)</li>';
+        adminLeaderboard.innerHTML = '<li style="text-align:center; color:#94A3B8; padding:28px;">ยังไม่มีรายชื่อผู้เข้าแข่งขันในรอบนี้</li>';
         return;
       }
 
       list.forEach((item, index) => {
         const li = document.createElement('li');
-        li.className = 'leaderboard-item' + (isScoreRevealed && index === 0 && item.score > 0 ? ' rank-top-1' : '');
+        li.className = 'leaderboard-item' + (index === 0 && item.score > 0 ? ' rank-top-1' : '');
 
         let rankClass = '';
         let medal = index + 1;
-        if (isScoreRevealed) {
-          if (index === 0) { rankClass = 'rank-1'; medal = '🥇'; }
-          else if (index === 1) { rankClass = 'rank-2'; medal = '🥈'; }
-          else if (index === 2) { rankClass = 'rank-3'; medal = '🥉'; }
-        }
+        if (index === 0) { rankClass = 'rank-1'; medal = '🥇'; }
+        else if (index === 1) { rankClass = 'rank-2'; medal = '🥈'; }
+        else if (index === 2) { rankClass = 'rank-3'; medal = '🥉'; }
 
         let statusBadge = '';
         if (item.status === 'playing') {
@@ -1668,17 +1744,13 @@ body {
           statusBadge = '<span class="status-finished">ส่งคะแนนแล้ว 🏁</span>';
         }
 
-        const scoreHtml = isScoreRevealed
-          ? `<div class="player-score">${item.score.toLocaleString()} คะแนน</div>`
-          : `<div class="player-score"><span class="score-masked">🔒 รอโชว์คะแนน</span></div>`;
-
         li.innerHTML = `
           <div class="player-info">
             <span class="rank-badge \${rankClass}">\${medal}</span>
             <span class="player-name">${escapeHtml(item.name)}</span>
             ${statusBadge}
           </div>
-          ${scoreHtml}
+          <div class="player-score">${item.score.toLocaleString()} คะแนน</div>
         `;
         adminLeaderboard.appendChild(li);
       });
@@ -1720,9 +1792,11 @@ body {
     function updateScoreVisibilityUI() {
       if (isScoreRevealed) {
         scoreHiddenNotice.style.display = 'none';
-        adminRevealScoreBtn.textContent = '🙈 ซ่อนตัวเลขคะแนน';
+        adminLeaderboard.style.display = 'block';
+        adminRevealScoreBtn.textContent = '🙈 ซ่อนรายชื่อ & คะแนน';
       } else {
         scoreHiddenNotice.style.display = 'block';
+        adminLeaderboard.style.display = 'none';
         adminRevealScoreBtn.textContent = '🏆 กดโชว์คะแนน & ประกาศผล!';
       }
       renderAdminLeaderboard();
@@ -1963,7 +2037,7 @@ body {
       initAudio();
       playStartSound();
 
-      // ซ่อนคะแนนไว้ระหว่างแข่งเพื่อรอลุ้นตอนจบ
+      // ซ่อนรายชื่อและคะแนนไว้ระหว่างแข่งเพื่อรอลุ้นตอนจบ
       isScoreRevealed = false;
       updateScoreVisibilityUI();
 
